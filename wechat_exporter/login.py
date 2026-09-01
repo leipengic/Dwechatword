@@ -28,7 +28,11 @@ def login_and_save_session(headless: bool = False) -> dict[str, Any]:
     print("=" * 56)
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=headless)
+        try:
+            # 优先使用系统已安装的 Edge/Chrome，避免下载 Chromium
+            browser = p.chromium.launch(channel="msedge", headless=headless)
+        except Exception:  # noqa: BLE001
+            browser = p.chromium.launch(headless=headless)
         context = browser.new_context()
         page = context.new_page()
         try:
