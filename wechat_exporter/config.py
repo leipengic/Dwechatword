@@ -35,12 +35,12 @@ class Settings:
         default_factory=lambda: PROJECT_ROOT / os.getenv("IMAGE_CACHE_DIR", ".image_cache")
     )
     log_dir: Path = field(default_factory=lambda: PROJECT_ROOT / "logs")
-    # 抓取行为
+    # 抓取行为（默认值偏保守，降低触发微信频控概率）
     page_size: int = _int_env("PAGE_SIZE", 5)
     max_pages: int = _int_env("MAX_PAGES", 0)          # 0 = 不限制
-    page_interval: float = _int_env("PAGE_INTERVAL", 5)
-    rate_limit_wait: int = _int_env("RATE_LIMIT_WAIT", 60)
-    article_interval: float = _int_env("ARTICLE_INTERVAL", 3)
+    page_interval: float = _int_env("PAGE_INTERVAL", 10)
+    rate_limit_wait: int = _int_env("RATE_LIMIT_WAIT", 120)
+    article_interval: float = _int_env("ARTICLE_INTERVAL", 5)
     # Word 文档版本号（文件命名 yyyy-mm-dd-标题-vX.X.docx）
     doc_version: str = os.getenv("DOC_VERSION", "v1.0")
 
