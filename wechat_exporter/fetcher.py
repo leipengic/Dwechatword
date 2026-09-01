@@ -39,6 +39,9 @@ class WeChatMPClient:
         self.session = requests.Session()
         self.session.headers.update({
             "User-Agent": UA,
+            "Accept": "application/json, text/javascript, */*; q=0.01",
+            "Accept-Language": "zh-CN,zh;q=0.9",
+            "X-Requested-With": "XMLHttpRequest",
             "Referer": f"{BASE}/cgi-bin/home?t=home/index&lang=zh_CN&token={token}",
         })
         for c in cookies:
@@ -47,14 +50,16 @@ class WeChatMPClient:
             )
 
     # ------------------------------------------------------------------ utils
-    def _get(self, url: str, params: dict[str, Any]) -> dict[str, Any]:
+    def _get(self, url: str, params: dict[str, Any],
+             referer: str | None = None) -> dict[str, Any]:
         params.update({
             "token": self.token,
             "lang": "zh_CN",
             "f": "json",
             "ajax": 1,
         })
-        resp = self.session.get(url, params=params, timeout=15)
+        headers = {"Referer": referer} if referer else None
+        resp = self.session.get(url, params=params, headers=headers, timeout=15)
         resp.raise_for_status()
         data = resp.json()
         ret = (data.get("base_resp") or {}).get("ret", RET_OK)
@@ -71,13 +76,15 @@ class WeChatMPClient:
     # ------------------------------------------------------------------ api
     def get_fakeid(self, account_name: str) -> str:
         """按公众号名称搜索，返回本人账号的 fakeid。"""
+        referer = (f"{BASE}/cgi-bin/appmsg?t=media/appmsg_list_v2"
+                   f"&action=list&token={self.token}&lang=zh_CN")
         data = self._get(f"{BASE}/cgi-bin/searchbiz", {
             "action": "search_biz",
             "begin": 0,
             "count": 5,
             "query": account_name,
             "random": round(random.random(), 16),
-        })
+        }, referer=referer)
         biz_list = data.get("list") or []
         if not biz_list:
             raise WeChatExporterError(f"未搜索到公众号「{account_name}」，请检查名称")
@@ -92,6 +99,8 @@ class WeChatMPClient:
     def list_articles(self, fakeid: str, begin: int, count: int | None = None) -> dict:
         """拉取一页文章列表。"""
         count = count or settings.page_size
+        referer = (f"{BASE}/cgi-bin/appmsg?t=media/appmsg_list_v2"
+                   f"&action=list&token={self.token}&lang=zh_CN")
         return self._get(f"{BASE}/cgi-bin/appmsg", {
             "action": "list_ex",
             "begin": begin,
@@ -100,7 +109,7 @@ class WeChatMPClient:
             "type": 9,          # 9 = 全部
             "query": "",
             "random": round(random.random(), 16),
-        })
+        }, referer=referer)
 
 
 def collect_all_articles(client: WeChatMPClient, fakeid: str) -> list[dict]:

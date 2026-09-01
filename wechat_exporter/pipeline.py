@@ -35,6 +35,9 @@ def run_export() -> list[Path]:
         raise
     logger.info("公众号 fakeid：%s", fakeid)
 
+    # searchbiz 后立即拉列表容易触发频控，先等一会
+    time.sleep(random.uniform(3, 6))
+
     # 3. 文章列表
     articles = collect_all_articles(client, fakeid)
     logger.info("文章列表采集完成，共 %s 篇", len(articles))
