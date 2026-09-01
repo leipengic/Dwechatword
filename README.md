@@ -48,7 +48,7 @@ Dwechatword/
 ```bash
 # 1. 安装依赖
 pip install -r requirements.txt
-playwright install chromium
+playwright install chromium   # 若下载失败，代码会自动使用系统已安装的 Edge/Chrome
 
 # 2. 配置
 copy .env.example .env    # 编辑 MP_ACCOUNT_NAME 为你的公众号名称
@@ -97,6 +97,16 @@ git push -u origin main
 ```
 
 > `.gitignore` 已排除 `.env`、`session.json`、`output/`、`logs/`，不会泄露登录凭据与本地数据。
+
+## 常见问题
+
+**Q：运行 `export` 一直报 `ret=200013` 频控怎么办？**
+- 说明当前账号/IP 触发了微信后台的频次限制。代码会自动指数退避重试 5 次，若仍失败需冷却 1~24 小时后再试。
+- 降低频率：将 `.env` 中的 `PAGE_INTERVAL` 调到 10~15、`RATE_LIMIT_WAIT` 调到 120 以上。
+- 避免在短时间内反复登录/导出，否则容易加重限制。
+
+**Q：`playwright install chromium` 下载失败怎么办？**
+- 保持系统 Edge/Chrome 为最新版即可，`login.py` 已优先调用系统浏览器，无需强制下载 Chromium。
 
 ## 免责声明
 
