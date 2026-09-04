@@ -55,11 +55,26 @@ class Article:
 
 
 # ---------------------------------------------------------------------- 抓取
-def fetch_html(url: str) -> str:
-    headers = {"User-Agent": UA, "Referer": "https://mp.weixin.qq.com/"}
-    resp = requests.get(url, headers=headers, timeout=20)
+def fetch_html(url: str, cookies: list[dict] | None = None) -> str:
+    """抓取文章页 HTML（通道 A 内部使用；通道 B 请优先用 ArticleFetcher）。
+
+    增强请求头与可选 cookies，降低触发反爬概率。
+    """
+    headers = {
+        "User-Agent": UA,
+        "Referer": "https://mp.weixin.qq.com/",
+        "Accept": ("text/html,application/xhtml+xml,application/xml;q=0.9,"
+                   "image/avif,image/webp,*/*;q=0.8"),
+        "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+    }
+    s = requests.Session()
+    for c in cookies or []:
+        s.cookies.set(c.get("name"), c.get("value"),
+                      domain=c.get("domain", ".qq.com"))
+    resp = s.get(url, headers=headers, timeout=30)
     resp.raise_for_status()
-    resp.encoding = "utf-8"
+    if not resp.encoding or resp.encoding.lower() in ("iso-8859-1",):
+        resp.encoding = resp.apparent_encoding or "utf-8"
     return resp.text
 
 

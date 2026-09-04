@@ -19,3 +19,11 @@ class RateLimitError(WeChatExporterError):
 
 class ParseError(WeChatExporterError):
     """文章内容解析失败。"""
+
+
+class AntiCrawlError(WeChatExporterError):
+    """文章页触发反爬验证（如环境异常/访问过于频繁），需降低频率或稍后重试。"""
+
+
+class FetchError(WeChatExporterError):
+    """文章页抓取失败（网络错误、链接失效、被拦截等）。"""
