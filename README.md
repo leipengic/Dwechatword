@@ -145,6 +145,10 @@ python main.py export --channel article --urls-file links.txt    # 从文件读�
 
 本项目仅供个人备份自有公众号内容使用。请勿用于抓取他人公众号、绕过平台限制或任何商业用途；使用产生的账号风险由使用者自行承担。
 
+## 贡献
+
+欢迎提交 Issue 与 Pull Request。参与前请阅读[贡献指南](CONTRIBUTING.md)与[行为准则](CODE_OF_CONDUCT.md)。
+
 ## 致谢
 
 本项目功能与思路参考了开源项目 [qiye45/wechatDownload](https://github.com/qiye45/wechatDownload)（微信公众号文章批量下载工具），特此感谢原作者 **qiye45（长风）** 的开源贡献与思路启发。本项目的文章页直抓通道与多格式导出在此思路上重新实现。
