@@ -111,3 +111,7 @@ git push -u origin main
 ## 免责声明
 
 本项目仅供个人备份自有公众号内容使用。请勿用于抓取他人公众号、绕过平台限制或任何商业用途；使用产生的账号风险由使用者自行承担。
+
+## License
+
+[MIT](./LICENSE) © leipengic
