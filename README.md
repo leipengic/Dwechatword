@@ -185,7 +185,7 @@ python main.py export --channel article --urls-file links.txt    # 从文件读�
 
 本项目功能与思路参考了开源项目 [qiye45/wechatDownload](https://github.com/qiye45/wechatDownload)（微信公众号文章批量下载工具），特此感谢原作者 **qiye45（长风）** 的开源贡献与思路启发。本项目的文章页直抓通道与多格式导出在此思路上重新实现。
 
-### Acknowledgements
+## 鸣谢（Acknowledgments）
 
 感谢以下开源项目与开发者（图标均取自官方站点 / CDN）：
 
