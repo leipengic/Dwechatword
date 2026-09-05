@@ -39,6 +39,38 @@ Dwechatword/
 └── output/                     # 导出结果（运行时生成，不入库）
 ```
 
+## 主要第三方库
+
+按用途归类，均为 `requirements.txt` 中已声明且代码中实际调用的库。
+
+### 浏览器自动化与网络请求
+
+| 库 | 在项目中做的事 | 为什么选它 |
+|---|---|---|
+| `playwright` | `login.py` 启动 Edge/Chromium 打开公众平台，人工扫码后从跳转 URL 提取 `token` 并持久化 cookies | 公众平台登录只有人机扫码一条路，Selenium 之外 Playwright 的等待与反检测更省心；下载 Chromium 失败时可直接用系统浏览器 |
+| `requests` | 两套通道的 HTTP 请求：后台接口分页、文章页直抓、图片下载 | 会话对象（`Session`）复用 cookies 与连接，配合自定义请求头最简单直接；项目无需异步并发 |
+
+### 页面解析
+
+| 库 | 在项目中做的事 | 为什么选它 |
+|---|---|---|
+| `beautifulsoup4` | `parser.py` 用 CSS 选择器定位 `#activity-name`、`#publish_time`、`#js_content`，再深度优先遍历产出结构化内容块 | 面对微信不规则的手写 HTML，容错性远好于正则与严格 XML 解析，改版时改选择器即可 |
+| `lxml` | 作为 BeautifulSoup 的底层解析器（`BeautifulSoup(html, "lxml")`） | 比内置 `html.parser` 快一个量级，大批量文章导出时差距明显 |
+
+### 文档导出
+
+| 库 | 在项目中做的事 | 为什么选它 |
+|---|---|---|
+| `python-docx` | `docx_writer.py` 生成 Word：标题、元信息灰字区、正文宋体小四与 1.5 倍行距、首行缩进、图片居中按页宽缩放 | 无需装 Office 即可写 `.docx`，对段落样式与图片布局的控制粒度足够 |
+| `Pillow` | 插入 Word 前读取图片原始尺寸，按页宽等比缩放 | 事实上的 Python 图像处理标准库，本项目只用到读取尺寸这一最小能力 |
+| `WeasyPrint` | `pdf_writer.py` 先渲染自包含 HTML（图片 base64 内联、声明中文字体）再转 PDF | 可直接复用 CSS 排版能力，中文字体与图片处理比 ReportLab 等方案省事；**可选依赖**，不导 PDF 可不装 |
+
+### 配置
+
+| 库 | 在项目中做的事 | 为什么选它 |
+|---|---|---|
+| `python-dotenv` | 读取 `.env` 中的 `MP_ACCOUNT_NAME`、间隔、重试等参数 | 账号与频率参数需要频繁调整，放 `.env` 比对命令行手工输入更友好，也避免把配置写进代码 |
+
 ## 实现原理
 
 ### 通道 A —— 后台接口批量导出（api）
@@ -152,6 +184,54 @@ python main.py export --channel article --urls-file links.txt    # 从文件读�
 ## 致谢
 
 本项目功能与思路参考了开源项目 [qiye45/wechatDownload](https://github.com/qiye45/wechatDownload)（微信公众号文章批量下载工具），特此感谢原作者 **qiye45（长风）** 的开源贡献与思路启发。本项目的文章页直抓通道与多格式导出在此思路上重新实现。
+
+### Acknowledgements
+
+感谢以下开源项目与开发者（图标均取自官方站点 / CDN）：
+
+<table>
+  <tr>
+    <td align="center" width="140">
+      <a href="https://github.com/qiye45">
+        <img src="https://github.com/qiye45.png?size=120" width="64" height="64" alt="qiye45" /><br />
+        <sub><b>qiye45（长风）</b></sub>
+      </a>
+      <br />
+      <sub><a href="https://github.com/qiye45/wechatDownload">wechatDownload</a> 作者</sub>
+    </td>
+    <td align="center" width="140">
+      <a href="https://www.jetbrains.com/idea/">
+        <img src="https://resources.jetbrains.com/storage/products/intellij-idea/img/meta/intellij-idea_logo_300x300.png" width="64" height="64" alt="IntelliJ IDEA" /><br />
+        <sub><b>IntelliJ IDEA</b></sub>
+      </a>
+      <br />
+      <sub>JetBrains 出品</sub>
+    </td>
+    <td align="center" width="140">
+      <a href="https://www.jetbrains.com/pycharm/">
+        <img src="https://resources.jetbrains.com/storage/products/pycharm/img/meta/pycharm_logo_300x300.png" width="64" height="64" alt="PyCharm" /><br />
+        <sub><b>PyCharm</b></sub>
+      </a>
+      <br />
+      <sub>JetBrains 出品</sub>
+    </td>
+  </tr>
+</table>
+
+| 项目 / 库 | 贡献 | 许可证 |
+|---|---|---|
+| [qiye45/wechatDownload](https://github.com/qiye45/wechatDownload) | 思路来源：文章抓取的整体流程与参数设计 | _（待补充：原仓库 LICENSE 未在本项目内核验，使用前请自行确认）_ |
+| [Playwright](https://github.com/microsoft/playwright) | 扫码登录与会话持久化 | Apache-2.0 |
+| [requests](https://github.com/psf/requests) | 所有 HTTP 请求 | Apache-2.0 |
+| [Beautiful Soup 4](https://www.crummy.com/software/BeautifulSoup/) | 文章 HTML 解析 | MIT |
+| [lxml](https://lxml.de/) | 高性能底层解析器 | BSD-3-Clause |
+| [python-docx](https://github.com/python-openxml/python-docx) | Word 导出 | MIT |
+| [Pillow](https://python-pillow.org/) | 读取图片尺寸用于排版 | HPND |
+| [WeasyPrint](https://weasyprint.org/) | HTML → PDF 渲染（可选依赖） | BSD-3-Clause |
+| [python-dotenv](https://github.com/theskumar/python-dotenv) | `.env` 配置加载 | BSD-3-Clause |
+| [JetBrains](https://www.jetbrains.com/) | 提供 IntelliJ IDEA / PyCharm 等开发工具 | 商业授权（开源项目可申请免费许可证） |
+
+> 贡献者名单：_（待补充，欢迎在 PR 中署名）_
 
 ## License
 
